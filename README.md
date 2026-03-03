@@ -27,7 +27,7 @@
 >
 > **Method:** We analysed T1-weighted MRI data from 15 independent cohorts (6 FEP, 9 Chronic Schizophrenia). The total sample comprised **396 FEP individuals** (398 controls) and **347 chronic schizophrenia individuals** (330 controls). Standardised VBM analysis and Seed-based d-mapping (SDM) were used to identify voxel-wise differences with robust FWE-corrected, threshold-free cluster enhancement (TFCE) statistics.
 >
-> **Results:** FEP patients exhibited widespread GM volume reductions, peaking at the **thalamus** ($Hedges’ g = 0.50$, $p < 0.001$). Chronic schizophrenia showed more extensive reductions, peaking at the **right medial frontal gyrus** ($g = 0.68$, $p < 0.001$). Regarding white matter, FEP peak reductions were in the **right inferior fronto-occipital fasciculus** ($g = 0.35$), while chronic patients peaked at the **right anterior corona radiata** ($g = 0.51$).
+> **Results:** FEP patients exhibited widespread GM volume reductions, peaking at the **thalamus** (Hedges’ g = 0.50, p < 0.001). Chronic schizophrenia showed more extensive reductions, peaking at the **right medial frontal gyrus** (g = 0.68, p < 0.001). Regarding white matter, FEP peak reductions were in the **right inferior fronto-occipital fasciculus** (g = 0.35), while chronic patients peaked at the **right anterior corona radiata** (g = 0.51).
 >
 > **Discussions:** Findings indicate that widespread GM and WM reductions are present at the onset of psychosis and appear to persist and potentially progress in chronic schizophrenia. This voxel-wise approach captures spatially distributed alterations that may be overlooked by other methodologies.
 
