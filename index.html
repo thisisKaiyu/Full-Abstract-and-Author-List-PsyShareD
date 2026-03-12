@@ -1,46 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="utf-8">
+  <title>Interactive Brain Map</title>
 
-<title>Interactive Brain Map</title>
+  <link rel="stylesheet" type="text/css"
+        href="https://cdn.jsdelivr.net/npm/papaya-viewer@1.0.145/release/current/papaya.css">
+  <script type="text/javascript"
+          src="https://cdn.jsdelivr.net/npm/papaya-viewer@1.0.145/release/current/papaya.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/papaya-viewer@1.0.145/release/current/papaya.js"></script>
-<link rel="stylesheet" type="text/css"
-href="https://cdn.jsdelivr.net/npm/papaya-viewer@1.0.145/release/current/papaya.css">
+  <script type="text/javascript">
+    var params = [];
+    params["images"] = ["ch256.nii", "stat_map.nii.gz"];
+    params["worldSpace"] = true;
 
-<style>
-body{
-font-family: Arial;
-text-align:center;
-background:#ffffff;
-}
+    params["stat_map.nii.gz"] = {
+      min: 2,
+      max: 6
+    };
+  </script>
 
-h2{
-margin-top:20px;
-}
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background: #ffffff;
+      margin: 20px;
+    }
 
-.papaya{
-margin:auto;
-}
-</style>
+    h2 {
+      margin-top: 20px;
+    }
 
+    .papaya {
+      margin: auto;
+    }
+  </style>
 </head>
 
 <body>
+  <h2>Voxel-wise GMV Alterations</h2>
+  <p>FEP vs Healthy Controls</p>
 
-<h2>Voxel-wise GMV Alterations</h2>
-
-<p>FEP vs Healthy Controls</p>
-
-<div class="papaya"
-data-params='{
-"images":[
-"ch256.nii",
-"stat_map.nii.gz"
-],
-"worldSpace": true
-}'>
-</div>
-
+  <div class="papaya" data-params="params"></div>
 </body>
 </html>
