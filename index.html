@@ -2,8 +2,14 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <title>3D Brain Viewer</title>
-  <script src="https://unpkg.com/@niivue/niivue/dist/niivue.umd.js"></script>
+  <title>Interactive Brain Map Viewer</title>
+
+  <!-- Papaya CSS & JS -->
+  <link rel="stylesheet" type="text/css"
+        href="https://rii-mango.github.io/Papaya/release/current/standard/papaya.css">
+  <script type="text/javascript"
+          src="https://rii-mango.github.io/Papaya/release/current/standard/papaya.js"></script>
+
   <style>
     * {
       margin: 0;
@@ -14,342 +20,165 @@
     body {
       font-family: Arial, sans-serif;
       text-align: center;
-      background: #1a1a2e;
-      color: #eee;
+      background: #ffffff;
+      color: #333;
       padding: 20px;
-      min-height: 100vh;
     }
 
     h2 {
-      margin-top: 10px;
-      font-size: 24px;
-      color: #00d2ff;
+      font-size: 22px;
+      margin-bottom: 4px;
     }
 
     p.subtitle {
-      margin: 6px 0 16px;
       font-size: 14px;
-      color: #aaa;
+      color: #777;
+      margin-bottom: 16px;
     }
 
-    /* Stat map selector */
+    /* Map selector buttons */
     .map-selector {
-      margin-bottom: 16px;
       display: flex;
       justify-content: center;
       flex-wrap: wrap;
       gap: 8px;
+      margin-bottom: 18px;
     }
 
     .map-btn {
-      padding: 10px 20px;
+      padding: 9px 18px;
       cursor: pointer;
-      border: 2px solid #0f3460;
-      border-radius: 8px;
-      background: transparent;
-      color: #aaa;
+      border: 2px solid #ccc;
+      border-radius: 6px;
+      background: #fff;
+      color: #555;
       font-size: 13px;
-      transition: all 0.2s;
+      font-weight: 600;
+      transition: all 0.15s;
     }
 
     .map-btn:hover {
-      border-color: #00d2ff;
-      color: #fff;
+      border-color: #2196F3;
+      color: #2196F3;
     }
 
     .map-btn.active {
-      background: #0f3460;
-      border-color: #00d2ff;
-      color: #00d2ff;
-      font-weight: bold;
-    }
-
-    /* View controls */
-    .controls {
-      margin-bottom: 16px;
-      display: flex;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    button.view-btn {
-      padding: 8px 18px;
-      cursor: pointer;
-      border: none;
-      border-radius: 6px;
-      background: #0f3460;
+      background: #2196F3;
+      border-color: #2196F3;
       color: #fff;
-      font-size: 14px;
-      transition: background 0.2s;
     }
 
-    button.view-btn:hover {
-      background: #00d2ff;
-      color: #1a1a2e;
+    /* Papaya container */
+    .papaya {
+      margin: 0 auto;
     }
 
     /* Loading overlay */
     #loading {
       display: none;
-      position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      background: rgba(10, 10, 30, 0.85);
-      border-radius: 8px;
-      z-index: 10;
-      justify-content: center;
-      align-items: center;
-      font-size: 18px;
-      color: #00d2ff;
+      margin: 12px auto;
+      font-size: 14px;
+      color: #2196F3;
     }
 
     #loading.visible {
-      display: flex;
-    }
-
-    .canvas-wrap {
-      width: 90%;
-      max-width: 960px;
-      margin: 0 auto;
-      position: relative;
-    }
-
-    #gl {
-      width: 100%;
-      height: 600px;
-      border-radius: 8px;
-      border: 1px solid #333;
-    }
-
-    .slider-group {
-      margin-top: 16px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      flex-wrap: wrap;
-    }
-
-    .slider-group label {
-      font-size: 13px;
-      color: #aaa;
-    }
-
-    .slider-group input[type="range"] {
-      width: 180px;
+      display: block;
     }
 
     footer {
-      margin-top: 24px;
-      font-size: 12px;
-      color: #555;
-    }
-
-    footer a {
-      color: #00d2ff;
+      margin-top: 20px;
+      font-size: 11px;
+      color: #aaa;
     }
   </style>
 </head>
 <body>
 
-  <h2>Voxel-wise Brain Volume Alterations (3D)</h2>
-  <p class="subtitle">Select a statistical map below, then explore in 3D or slice views</p>
+  <h2>Voxel-wise Brain Volume Alterations</h2>
+  <p class="subtitle">Select a contrast to view the statistical map</p>
 
-  <!-- Statistical map selector -->
+  <!-- Map selector -->
   <div class="map-selector">
-    <button class="map-btn active" onclick="loadMap(0, this)">FEP vs HC &mdash; GMV</button>
-    <button class="map-btn"        onclick="loadMap(1, this)">FEP vs HC &mdash; WMV</button>
-    <button class="map-btn"        onclick="loadMap(2, this)">SCZ vs HC &mdash; GMV</button>
-    <button class="map-btn"        onclick="loadMap(3, this)">SCZ vs HC &mdash; WMV</button>
+    <button class="map-btn active" onclick="switchMap(0, this)">FEP vs HC &mdash; GMV</button>
+    <button class="map-btn"        onclick="switchMap(1, this)">FEP vs HC &mdash; WMV</button>
+    <button class="map-btn"        onclick="switchMap(2, this)">SCZ vs HC &mdash; GMV</button>
+    <button class="map-btn"        onclick="switchMap(3, this)">SCZ vs HC &mdash; WMV</button>
   </div>
 
-  <!-- View controls -->
-  <div class="controls">
-    <button class="view-btn" onclick="setView('3d')">&#129504; 3D Render</button>
-    <button class="view-btn" onclick="setView('multi')">&#128306; Multiplanar</button>
-    <button class="view-btn" onclick="setView('axial')">Axial</button>
-    <button class="view-btn" onclick="setView('coronal')">Coronal</button>
-    <button class="view-btn" onclick="setView('sagittal')">Sagittal</button>
-    <button class="view-btn" onclick="resetView()">&#128260; Reset View</button>
-  </div>
+  <div id="loading">Loading image&hellip;</div>
 
-  <!-- Canvas -->
-  <div class="canvas-wrap">
-    <div id="loading"><span>Loading image&hellip;</span></div>
-    <canvas id="gl"></canvas>
-  </div>
-
-  <!-- Sliders -->
-  <div class="slider-group">
-    <label>Overlay Opacity:</label>
-    <input type="range" id="opacitySlider" min="0" max="100" value="70"
-           oninput="changeOpacity(this.value)">
-    <span id="opacityVal">70%</span>
-
-    <label style="margin-left: 20px;">Threshold Min:</label>
-    <input type="range" id="minSlider" min="0" max="10" value="2" step="0.1"
-           oninput="changeThreshold()">
-    <span id="minVal">2.0</span>
-
-    <label>Threshold Max:</label>
-    <input type="range" id="maxSlider" min="0" max="10" value="6" step="0.1"
-           oninput="changeThreshold()">
-    <span id="maxVal">6.0</span>
+  <!-- Papaya viewer (will be rebuilt on each map switch) -->
+  <div id="viewer-container">
+    <div class="papaya" id="papaya-viewer" data-params="params"></div>
   </div>
 
   <footer>
-    Powered by <a href="https://github.com/niivue/niivue" target="_blank">NiiVue</a>
-    &nbsp;|&nbsp; Drag to rotate 3D view &middot; Scroll to zoom
+    Powered by <a href="https://github.com/rii-mango/Papaya" target="_blank">Papaya Viewer</a>
+    &nbsp;|&nbsp; Click and drag to navigate slices &middot; Scroll to change slice
   </footer>
 
-  <script>
-    // -- Available statistical maps (same directory as this HTML) --
-    const STAT_MAPS = [
+  <script type="text/javascript">
+    // -- Available statistical overlays (same directory as this HTML) --
+    var STAT_MAPS = [
       "FEP_vs_HC_GMV.nii.gz",
       "FEP_vs_HC_WMV.nii.gz",
       "SCZ_vs_HC_GMV.nii.gz",
-      "SCZ_vs_HC_WMV.nii.gz",
+      "SCZ_vs_HC_WMV.nii.gz"
     ];
 
-    let nv;
-    let currentMapIndex = 0;
+    var BASE_IMAGE = "ch256.nii.gz";   // Use gzipped version for faster loading
+    var currentIndex = 0;
 
-    // -- Initialise NiiVue and load the default map --
-    async function init() {
-      nv = new niivue.Niivue({
-        backColor: [0.05, 0.05, 0.12, 1],
-        show3Dcrosshair: false,
-        crosshairColor: [0, 0.8, 1, 0.5],
-      });
+    // -- Default Papaya params (loaded on page init) --
+    var params = [];
+    params["images"]     = [BASE_IMAGE, STAT_MAPS[0]];
+    params["worldSpace"] = true;
+    params["luts"]       = [["Gray", "Red Overlay"]];
+    params[STAT_MAPS[0]] = { min: 2, max: 6, lut: "Red Overlay" };
 
-      nv.attachToCanvas(document.getElementById("gl"));
+    // -- Switch to a different statistical map --
+    function switchMap(index, btnElement) {
+      if (index === currentIndex) return;
+      currentIndex = index;
 
-      // Load the base anatomical image + default overlay
-      await loadVolumes(STAT_MAPS[0]);
-
-      // Start in 3D render mode
-      setView("3d");
-    }
-
-    // -- Load base image + selected overlay --
-    async function loadVolumes(statMapFile) {
-      showLoading(true);
-
-      try {
-        await nv.loadVolumes([
-          {
-            url: "ch256.nii",        // Base anatomical image
-            colormap: "gray",
-            opacity: 1.0,
-          },
-          {
-            url: statMapFile,        // Selected statistical overlay
-            colormap: "warm",
-            opacity: parseFloat(document.getElementById("opacitySlider").value) / 100,
-            cal_min: parseFloat(document.getElementById("minSlider").value),
-            cal_max: parseFloat(document.getElementById("maxSlider").value),
-          },
-        ]);
-      } catch (err) {
-        console.error("Failed to load volumes:", err);
+      // Update button styles
+      var buttons = document.querySelectorAll(".map-btn");
+      for (var i = 0; i < buttons.length; i++) {
+        buttons[i].classList.remove("active");
       }
-
-      showLoading(false);
-    }
-
-    // -- Switch statistical map --
-    async function loadMap(index, btnElement) {
-      if (index === currentMapIndex) return;
-      currentMapIndex = index;
-
-      // Update active button style
-      document.querySelectorAll(".map-btn").forEach(function (b) {
-        b.classList.remove("active");
-      });
       btnElement.classList.add("active");
 
-      // Only reload the overlay (index 1) to speed things up
-      showLoading(true);
+      // Show loading indicator
+      document.getElementById("loading").classList.add("visible");
 
-      try {
-        // Remove old overlay, keep base image
-        if (nv.volumes.length > 1) {
-          nv.removeVolumeByIndex(1);
-        }
+      // Remove old viewer
+      var container = document.getElementById("viewer-container");
+      container.innerHTML = "";
 
-        await nv.addVolumeFromUrl({
-          url: STAT_MAPS[index],
-          colormap: "warm",
-          opacity: parseFloat(document.getElementById("opacitySlider").value) / 100,
-          cal_min: parseFloat(document.getElementById("minSlider").value),
-          cal_max: parseFloat(document.getElementById("maxSlider").value),
-        });
-      } catch (err) {
-        console.error("Failed to load overlay:", err);
-      }
+      // Build new params
+      var newParams = [];
+      newParams["images"]          = [BASE_IMAGE, STAT_MAPS[index]];
+      newParams["worldSpace"]      = true;
+      newParams["luts"]            = [["Gray", "Red Overlay"]];
+      newParams[STAT_MAPS[index]]  = { min: 2, max: 6, lut: "Red Overlay" };
 
-      showLoading(false);
+      // Create fresh Papaya div
+      var div = document.createElement("div");
+      div.className = "papaya";
+      div.setAttribute("data-params", "newParams");
+      container.appendChild(div);
+
+      // Expose newParams globally so Papaya can find it
+      window.newParams = newParams;
+
+      // Re-initialise Papaya
+      papaya.Container.resetViewer(0, newParams);
+
+      // Hide loading indicator after a short delay
+      setTimeout(function () {
+        document.getElementById("loading").classList.remove("visible");
+      }, 500);
     }
-
-    // -- View controls --
-    function setView(type) {
-      switch (type) {
-        case "3d":
-          nv.setSliceType(nv.sliceTypeRender);
-          break;
-        case "multi":
-          nv.setSliceType(nv.sliceTypeMultiplanar);
-          break;
-        case "axial":
-          nv.setSliceType(nv.sliceTypeAxial);
-          break;
-        case "coronal":
-          nv.setSliceType(nv.sliceTypeCoronal);
-          break;
-        case "sagittal":
-          nv.setSliceType(nv.sliceTypeSagittal);
-          break;
-      }
-    }
-
-    function resetView() {
-      nv.setRenderAzimuthElevation(120, 20);
-    }
-
-    // -- Overlay opacity --
-    function changeOpacity(val) {
-      var opacity = val / 100;
-      document.getElementById("opacityVal").textContent = val + "%";
-      if (nv.volumes.length > 1) {
-        nv.setOpacity(1, opacity);
-      }
-    }
-
-    // -- Threshold adjustment --
-    function changeThreshold() {
-      var minVal = parseFloat(document.getElementById("minSlider").value);
-      var maxVal = parseFloat(document.getElementById("maxSlider").value);
-      document.getElementById("minVal").textContent = minVal.toFixed(1);
-      document.getElementById("maxVal").textContent = maxVal.toFixed(1);
-      if (nv.volumes.length > 1) {
-        nv.volumes[1].cal_min = minVal;
-        nv.volumes[1].cal_max = maxVal;
-        nv.updateGLVolume();
-      }
-    }
-
-    // -- Loading indicator --
-    function showLoading(visible) {
-      var el = document.getElementById("loading");
-      if (visible) {
-        el.classList.add("visible");
-      } else {
-        el.classList.remove("visible");
-      }
-    }
-
-    // -- Start --
-    init();
   </script>
 
 </body>
